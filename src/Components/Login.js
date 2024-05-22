@@ -1,9 +1,21 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { netflix_background } from "../Utils/constants";
+import { checkValidData } from "../Utils/validate";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
+
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const name = useRef(null);
+  const email = useRef(null);
+  const password = useRef(null);
+
+  const handleButtonClick = () => {
+    const message = checkValidData(name.current.value, email.current.value, password.current.value);
+    setErrorMessage(message);
+  };
 
   const toggleSignUpForm = () => {
     setIsSignInForm(!isSignInForm);
@@ -16,46 +28,59 @@ const Login = () => {
         <img src={netflix_background} alt="netflix-background" />
       </div>
 
-      <form className="absolute w-3/12 text-center p-12 bg-black bg-opacity-75 mx-auto my-24 right-0 left-1">
+      <form onSubmit={(e) => { e.preventDefault() }} className="absolute w-3/12 text-center p-12 bg-black bg-opacity-75 mx-auto my-24 right-0 left-1">
+
         <h1 className="p-2 my-2 font-bold text-3xl mb-2 text-white text-left ">
-          { isSignInForm ? "Sign In" : "Sign Up" }
+          {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
-        { !isSignInForm && <input
+
+        {!isSignInForm && <input
+          ref={name}
           type="text"
           placeholder="Enter Full Name"
-          className="p-4 my-4 w-full mb-3 relative rounded border bg-transparent border-slate-400 cursor-pointer"
+          className="p-4 my-4 w-full mb-3 relative rounded text-white border bg-transparent border-slate-400"
         />}
+
         <input
+          ref={email}
           type="text"
           placeholder="Enter Email Address"
-          className="p-4 my-4 w-full mb-3 relative rounded border bg-transparent border-slate-400 cursor-pointer"
+          className="p-4 my-4 w-full mb-3 relative rounded text-white border bg-transparent border-slate-400"
         />
+
         <input
+          ref={password}
           type="password"
           placeholder="Enter Password"
-          className="p-4 my-4 w-full mb-6 relative rounded bg-transparent border border-slate-300 cursor-pointer"
+          className="p-4 my-4 w-full mb-6 relative rounded text-white bg-transparent border border-slate-300"
         />
-        <button className="p-2 my-2 w-full bg-red-600 font-bold relative rounded text-white cursor-pointer">
-          { isSignInForm ? "Sign In" : "Sign Up" }
+
+        <p className="text-red-700 text-left p-2 font-bold">{errorMessage}</p>
+
+        <button className="p-2 my-2 w-full bg-red-600 font-bold relative rounded text-white cursor-pointer" onClick={handleButtonClick}>
+          {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
-        <p className="w-full bg-transparent relative rounded text-gray-400">
+
+        {isSignInForm && <p className="w-full bg-transparent relative rounded text-gray-400">
           OR
-        </p>
-        <button className="p-2 my-2 w-full bg-opacity-75 bg-zinc-500 font-bold relative rounded text-white cursor-pointer">
+        </p>}
+
+        {isSignInForm && <button className="p-2 my-2 w-full bg-opacity-75 bg-zinc-500 font-bold relative rounded text-white cursor-pointer">
           Use a Sign-In Code
-        </button>
+        </button>}
 
         <p className="p-2 my-2 text-white cursor-pointer">Forgot Password?</p>
 
         <div className="flex">
           <input type="checkbox" className="mr-2 w-5 h-5 cursor-pointer" />
-          <p className=" text-white cursor-pointer text-left text-lg">
+
+          <p className=" text-white text-left text-lg">
             Remember me
           </p>
         </div>
 
         <p className="mt-2 text-left text-gray-400 mb-6">
-          { isSignInForm ? "New to Netflix?" : "Already Registered!!" }
+          {isSignInForm ? "New to Netflix?" : "Already Registered!!"}
           <span
             className="text-white ml-2 cursor-pointer border-b-2"
             onClick={toggleSignUpForm}
