@@ -1,15 +1,18 @@
 import React, { useRef, useState } from "react";
-import Header from "./Header";
+import Header from './Header';
 import { netflix_background } from "../Utils/constants";
 import { checkValidData } from "../Utils/validate";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../Utils/firebase";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../Utils/userSlice";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const name = useRef(null);
   const email = useRef(null);
@@ -28,10 +31,20 @@ const Login = () => {
         .then((userCredential) => {
           // Signed up 
           const user = userCredential.user;
-          
+
           updateProfile(user, {
             displayName: name.current.value, photoURL: "https://avatars.githubusercontent.com/u/47742056?v=4"
           }).then(() => {
+
+            const { uid, email, displayName, photoURL } = auth.currentUser;
+            dispatch(
+              addUser({
+                uid: uid,
+                email: email,
+                displayName: displayName,
+                photoURL: photoURL
+            }));
+
             navigate("/browse");
           }).catch((error) => {
             const errorCode = error.code;
