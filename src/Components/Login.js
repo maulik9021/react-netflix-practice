@@ -2,19 +2,65 @@ import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { netflix_background } from "../Utils/constants";
 import { checkValidData } from "../Utils/validate";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../Utils/firebase";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
-
   const [errorMessage, setErrorMessage] = useState(null);
+  const navigate = useNavigate();
 
   const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
 
   const handleButtonClick = () => {
-    const message = checkValidData(name.current.value, email.current.value, password.current.value);
+    const message = checkValidData(email.current.value, password.current.value);
     setErrorMessage(message);
+
+    if (message) return;
+
+    if (!isSignInForm) {
+
+      //SignUp Logic
+      createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+          
+          updateProfile(user, {
+            displayName: name.current.value, photoURL: "https://avatars.githubusercontent.com/u/47742056?v=4"
+          }).then(() => {
+            navigate("/browse");
+          }).catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(errorCode + "-" + errorMessage);
+          });
+
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    } else {
+
+      //SignIn Logic
+      signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          // Signed in 
+          const user = userCredential.user;
+          console.log(user);
+          navigate("/browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    }
   };
 
   const toggleSignUpForm = () => {
@@ -61,13 +107,13 @@ const Login = () => {
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
 
-        {isSignInForm && <p className="w-full bg-transparent relative rounded text-gray-400">
+        {/* isSignInForm && <p className="w-full bg-transparent relative rounded text-gray-400">
           OR
-        </p>}
+        </p> */}
 
-        {isSignInForm && <button className="p-2 my-2 w-full bg-opacity-75 bg-zinc-500 font-bold relative rounded text-white cursor-pointer">
+        {/* isSignInForm && <button className="p-2 my-2 w-full bg-opacity-75 bg-zinc-500 font-bold relative rounded text-white cursor-pointer">
           Use a Sign-In Code
-        </button>}
+        </button> */}
 
         <p className="p-2 my-2 text-white cursor-pointer">Forgot Password?</p>
 
